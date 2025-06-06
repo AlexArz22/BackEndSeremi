@@ -14,4 +14,8 @@ router.post('/login', UserController.login);
 
 router.get('/', authenticateToken, UserController.index);
 
+router.get('/:rut', authenticateToken, UserController.show);
+router.put('/:rut', authenticateToken, validateUser, UserController.update);
+router.delete('/:rut', authenticateToken, UserController.destroy);
+
 module.exports = router;

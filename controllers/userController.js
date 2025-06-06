@@ -79,7 +79,46 @@ const UserController = {
     } catch (error) {
       res.status(500).json({ message: 'Error al iniciar sesión', error });
     }
+  },
+
+ show: (req, res) => {
+  const { rut } = req.params;
+  UserModel.findByRut(rut, (err, user) => {
+    if (err) return res.status(500).json({ error: err });
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+    res.json(user);
+  });
+},
+
+update: async (req, res) => {
+  const { rut } = req.params;
+  const userData = req.body;
+
+  if (userData.contrasenia) {
+    userData.contrasenia = await bcrypt.hash(userData.contrasenia, 10);
   }
+
+  UserModel.update(rut, userData, (err, result) => {
+    if (err) return res.status(500).json({ error: err });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+    res.json({ message: 'Usuario actualizado correctamente' });
+  });
+},
+
+destroy: (req, res) => {
+  const { rut } = req.params;
+
+  UserModel.delete(rut, (err, result) => {
+    if (err) return res.status(500).json({ error: err });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+    res.json({ message: 'Usuario eliminado correctamente' });
+  });
+}
+
 };
 
 module.exports = UserController;
