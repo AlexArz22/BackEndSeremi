@@ -13,6 +13,7 @@ const UserController = {
 
   store: async (req, res) => {
     try {
+      console.log('Registro recibido');
       const {
         rut,
         nombre,
@@ -26,6 +27,7 @@ const UserController = {
       } = req.body;
 
       if (!rut || !nombre || !apellido || !contrasenia || !email || terminos !== 1) {
+        console.log(' error 400.err');
         return res.status(400).json({ message: 'Faltan datos requeridos o términos no aceptados' });
       }
 
@@ -44,28 +46,42 @@ const UserController = {
       };
 
       UserModel.create(newUser, (err, result) => {
-        if (err) return res.status(500).json({ error: err });
+        if (err){
+          console.log(' error 500:err');
+          return res.status(500).json({ error: err });
+        } 
         res.status(201).json({ rut: newUser.rut, email: newUser.email });
+        console.log('registro success');
       });
     } catch (error) {
+      console.log(' error 500.catch');
       res.status(500).json({ message: 'Error al registrar usuario', error });
     }
   },
 
   login: async (req, res) => {
     try {
+      console.log(' inicio recibido');
       const { email, contrasenia } = req.body;
 
       if (!email || !contrasenia) {
+        console.log('error 400.EmailorKey');
         return res.status(400).json({ message: 'Email y contraseña son requeridos' });
       }
 
       UserModel.findByEmail(email, async (err, user) => {
-        if (err) return res.status(500).json({ message: 'Error en la base de datos' });
-        if (!user) return res.status(401).json({ message: 'Credenciales inválidas' });
+        if (err){
+          console.log('error 500.BD');
+          return res.status(500).json({ message: 'Error en la base de datos' });
+        } 
+        if (!user){
+          console.log('error 401.usr');
+          return res.status(401).json({ message: 'Credenciales inválidas' });
+        }
 
         const passwordMatch = await bcrypt.compare(contrasenia, user.contrasenia);
         if (!passwordMatch) {
+          console.log('error 401.key');
           return res.status(401).json({ message: 'Credenciales inválidas' });
         }
 
@@ -75,8 +91,10 @@ const UserController = {
           { expiresIn: '1h' }
         );
         res.json({ token });
+        console.log('Inicio succes');
       });
     } catch (error) {
+      console.log('error 500.initError');
       res.status(500).json({ message: 'Error al iniciar sesión', error });
     }
   },
@@ -84,7 +102,10 @@ const UserController = {
  show: (req, res) => {
   const { rut } = req.params;
   UserModel.findByRut(rut, (err, user) => {
-    if (err) return res.status(500).json({ error: err });
+    if (err){
+      return res.status(500).json({ error: err });
+    }
+     
     if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
     res.json(user);
   });
