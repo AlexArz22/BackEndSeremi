@@ -42,7 +42,8 @@ const UserController = {
         region,
         comuna,
         direccion,
-        terminos
+        terminos,
+        rol: 'usuario'
       };
 
       UserModel.create(newUser, (err, result) => {
@@ -86,7 +87,7 @@ const UserController = {
         }
 
         const token = jwt.sign(
-          { rut: user.rut, email: user.email },
+          { rut: user.rut, email: user.email, rol: user.rol },
           config.secretKey,
           { expiresIn: '1h' }
         );
